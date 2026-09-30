@@ -1,32 +1,26 @@
-# 02-led-strip
+# 03-led-strip
 
 Lights up the M5Stack Fire's onboard RGB LED strip (10× SK6812/WS2812-
 compatible pixels), cycling red → green → blue → white every second.
 
-## Why this needs a devicetree overlay
-
 Zephyr's mainline `m5stack_fire` board file doesn't define this LED strip
-at all — it's not in the upstream devicetree. It also can't use Zephyr's
-GPIO bit-bang WS2812 driver, since that one only supports Nordic nRF SoCs.
+at all — it's not in the upstream devicetree. 
 
-So [`boards/m5stack_fire_esp32_procpu.overlay`](boards/m5stack_fire_esp32_procpu.overlay)
-drives it over SPI instead — the same approach Zephyr's own
+So [`common/boards/m5stack_fire_esp32_procpu.overlay`](../common/boards/m5stack_fire_esp32_procpu.overlay)
+drives it over SPI — the same approach Zephyr's own
 `adafruit_feather_esp32` board (same ESP32 chip) uses for its onboard
-WS2812:
+WS2812. It lives in `common/` (pointed at explicitly via `DTC_OVERLAY_FILE`
+in this example's `CMakeLists.txt`, rather than the usual auto-discovered
+`boards/<board>.overlay` in the app directory) because `04-led-shell` needs
+the exact same overlay — one file instead of two identical copies:
 
-- The strip's single data line is on **GPIO15** (per M5Stack's own
-  documentation/community examples — not in Zephyr's devicetree, since
-  Zephyr doesn't know about this peripheral).
+- The strip's single data line is on **GPIO15** (as described in M5Stack's own
+  documentation/community examples).
 - **SPI2** is free on this board (SPI3 is already used for the SD card),
   so its MOSI line is routed to GPIO15 via the ESP32 GPIO matrix. SCLK/MISO
   are left unconnected — WS2812 only needs the one data line, SPI is just
   used as a convenient way to generate its bit timing.
 
-**What's verified:** the overlay builds cleanly and the resolved
-devicetree (`build/zephyr/zephyr.dts`) shows exactly the intended node —
-`chain-length = 10`, 7 MHz SPI, correct color mapping, SPI2 enabled
-without touching SPI3/the SD card. **Not yet verified:** actual light
-output on a real board — that's what you're about to do.
 
 ## How the code works (for absolute Zephyr beginners)
 
@@ -131,7 +125,7 @@ it into the exact timing the WS2812/SK6812 chip expects — that's
 ```sh
 source ~/zephyrproject/.venv/bin/activate
 export ZEPHYR_BASE=~/zephyrproject/zephyr
-west build -p always -b m5stack_fire/esp32/procpu -d build 02-led-strip
+west build -p always -b m5stack_fire/esp32/procpu -d build 03-led-strip
 ```
 
 ## Flash
@@ -147,15 +141,6 @@ see [../01-hello/README.md](../01-hello/README.md)).
 
 Watch the strip on the underside of the device — it should cycle red,
 green, blue, white, one second each, all 10 pixels at once.
-
-If the colors are in the wrong order (e.g. red shows as green), the fix is
-in the overlay, not the code: reorder the `color-mapping` property's three
-`LED_COLOR_ID_*` values to match what you actually see.
-
-If nothing lights up, open a serial console (see
-[../01-hello/README.md](../01-hello/README.md)) and check the log output —
-`main` logs an error if the LED strip device isn't ready, or if
-`led_strip_update_rgb()` fails.
 
 The shell is enabled here too, same as in `01-hello`. At the `uart:~$`
 prompt, `device list` should show a `ws2812@0` entry (on `spi@3ff64000`,
