@@ -66,9 +66,7 @@ void draw_char(int16_t x0, int16_t y0, char c, uint16_t color)
 /* ── draw_char_scaled ─────────────────────────────────────────────────
  * Same glyph data as draw_char(), but each source pixel is drawn as a
  * scale × scale block - a blocky upscale rather than a second, larger
- * font. Avoids needing to source and re-verify the license on a whole
- * separate bitmap font just to get bigger text (see font16.c's header
- * for why that matters here).
+ * font.
  */
 void draw_char_scaled(int16_t x0, int16_t y0, char c, uint16_t color, uint8_t scale)
 {
