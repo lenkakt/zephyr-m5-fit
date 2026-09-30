@@ -4,15 +4,13 @@ Fills the M5Stack Fire's built-in 320×240 color screen with a solid color,
 cycling red → green → blue → white every second — the display equivalent
 of `03-led-strip`.
 
-## Why no devicetree overlay is needed here
-
 Unlike the LED strip, the display is already fully described in Zephyr's
 mainline `m5stack_fire` devicetree: an `ili9342c` panel node, wired up over
 the `mipi_dbi` SPI wrapper, already `status = "okay"`, and already marked
 as *the* display via `chosen { zephyr,display = &ili9342c; };`. So this
 example only needs `CONFIG_DISPLAY=y` — no overlay.
 
-## What I checked, and why this isn't using Zephyr's higher-level display subsystem
+## Zephyr display
 
 Zephyr actually has *two* display-related layers, and it's worth being
 explicit about which one this uses and why:
@@ -25,17 +23,7 @@ explicit about which one this uses and why:
   `cfb_draw_line()`, etc.), with its own shell (`cfb_shell` sample) that
   would have fit this project's shell-driven verification pattern nicely.
 
-I checked whether CFB would work here before writing any code, and it
-won't: CFB's own `cmd_init` (and the plain `samples/subsys/display/cfb`
-sample) both hardcode `display_set_pixel_format(dev, PIXEL_FORMAT_MONO10)`,
-falling back to `PIXEL_FORMAT_MONO01` — i.e. **CFB is built for monochrome
-displays**. The `ili9342c` driver
-(`drivers/display/display_ili9xxx.c`) only ever advertises
-`PIXEL_FORMAT_RGB_565 | PIXEL_FORMAT_RGB_888 | PIXEL_FORMAT_RGB_565X` as
-supported — neither mono format — so CFB's init would simply fail on this
-board. That's a real limitation of CFB, not something wrong with this
-board or this app; a proper CFB-on-color-display would need someone to add
-RGB support to `subsys/fb/cfb.c` itself.
+The Character FrameBuffer subsystem is unfortunatelly not yet supported at this board.
 
 So this example talks to the raw `CONFIG_DISPLAY` API directly instead,
 following the same approach as Zephyr's own
@@ -107,8 +95,11 @@ duty — on, at half brightness. This has to happen once, before the first
 
 ### Byte order matters, and I initially got it backwards
 
-Colors are RGB565 (`0xF800` = red, `0x07E0` = green, ...), but the bytes
-have to go out **big-endian** — `sys_cpu_to_be16(color)` before writing.
+Colors are RGB565, named via [`common/colors.h`](../common/colors.h)
+(`COLOR_RED` = `0xF800`, `COLOR_LIME` = `0x07E0`, ...) rather than bare
+hex literals — that header is shared with `06-text` so both examples name
+the same 16 colors the same way. But the bytes have to go out
+**big-endian** — `sys_cpu_to_be16(color)` before writing.
 My first pass at this file assumed native (little-endian) byte order,
 reasoning from how Zephyr's generic `samples/drivers/display` sample
 handles its two RGB565 variants. That reasoning was wrong for this panel.

@@ -6,6 +6,8 @@
 #include <zephyr/sys/util.h>
 #include <zephyr/logging/log.h>
 
+#include "colors.h"
+
 LOG_MODULE_REGISTER(main);
 
 #define DISPLAY_NODE DT_CHOSEN(zephyr_display)
@@ -25,15 +27,16 @@ LOG_MODULE_REGISTER(main);
 static const struct pwm_dt_spec backlight = PWM_DT_SPEC_GET(LCD_BG_NODE);
 
 /*
- * RGB565, but the panel expects it big-endian on the wire - confirmed
- * against a known-working app for this exact board/display
- * (m5stack-fire-soil-ble-server's display_direct.c), not assumed.
+ * RGB565 (see common/colors.h), but the panel expects it big-endian on
+ * the wire - confirmed against a known-working app for this exact
+ * board/display (m5stack-fire-soil-ble-server's display_direct.c), not
+ * assumed.
  */
 static const uint16_t colors[] = {
-	0xF800, /* red */
-	0x07E0, /* green */
-	0x001F, /* blue */
-	0xFFFF, /* white */
+	COLOR_RED,
+	COLOR_LIME, /* the fully-saturated "green" used throughout this repo */
+	COLOR_BLUE,
+	COLOR_WHITE,
 };
 
 static uint16_t row_buf[DISPLAY_WIDTH * ROWS_PER_WRITE];
