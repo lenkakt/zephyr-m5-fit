@@ -43,6 +43,8 @@ for the pattern.
 | [04-led-shell](04-led-shell) | Same LED strip, plus `led off`/`led on` shell commands — and why turning WS2812 LEDs off needs an explicit command, not just a different app. |
 | [05-display](05-display) | Fills the built-in 320×240 color screen with cycling colors via Zephyr's `CONFIG_DISPLAY` driver API — and why the higher-level Character Framebuffer subsystem *doesn't* work here (it's mono-only). |
 | [06-text](06-text) | Renders real text on the screen without LVGL — a hand-rolled bitmap-font renderer in `common/`, and why Zephyr's own CFB text subsystem can't drive this panel's color output either. |
+| [07-wifi](07-wifi) | Connects to Wi-Fi using a credential provisioned once over the shell (`wifi cred add`) — never hardcoded in source — and why Zephyr's `net_mgmt` events, not a blocking connect call, are how you find out the result. |
+| [08-http](08-http) | Polls a small HTTP color server and drives the LED strip from the response, with a button press triggering a `POST` — ties `07-wifi` together with `02-buttons` and `03-led-strip`, plus Zephyr's HTTP client API. |
 
 [`experimental-lvgl`](experimental-lvgl) also exists — an LVGL-based demo
 with button-switched modes — but it's parked: real hardware testing hit a
