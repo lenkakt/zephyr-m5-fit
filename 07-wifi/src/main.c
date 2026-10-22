@@ -3,12 +3,20 @@
 #include <zephyr/net/net_mgmt.h>
 #include <zephyr/net/net_event.h>
 #include <zephyr/net/wifi_mgmt.h>
+#include <zephyr/net/wifi_credentials.h>
 #include <zephyr/logging/log.h>
 
 LOG_MODULE_REGISTER(main);
 
 static struct net_mgmt_event_callback wifi_cb;
 static struct net_mgmt_event_callback ipv4_cb;
+
+static void count_ssid(void *cb_arg, const char *ssid, size_t ssid_len)
+{
+	size_t *count = cb_arg;
+
+	(*count)++;
+}
 
 static void print_wifi_status(struct net_if *iface)
 {
@@ -51,16 +59,26 @@ int main(void)
 				     NET_EVENT_IPV4_ADDR_ADD);
 	net_mgmt_add_event_callback(&ipv4_cb);
 
-	/* Connect using whatever credential was provisioned over the
-	 * shell with `wifi cred add` - no SSID/password anywhere in
-	 * this file, see README.md.
+	/* NET_REQUEST_WIFI_CONNECT_STORED always returns 0 when there is
+	 * nothing stored to connect to - it just loops over zero saved
+	 * credentials and does nothing (the same is true of the shell's
+	 * own `wifi cred auto_connect`). So check the credential count
+	 * ourselves first instead of trusting that return value.
 	 */
+	size_t cred_count = 0;
+
+	wifi_credentials_for_each_ssid(count_ssid, &cred_count);
+
+	if (cred_count == 0) {
+		LOG_ERR("No stored Wi-Fi credential - provision one first, over the shell:");
+		LOG_INF("  wifi cred add -s \"<SSID>\" -k 1 -p \"<password>\"");
+		return 0;
+	}
+
 	int ret = net_mgmt(NET_REQUEST_WIFI_CONNECT_STORED, iface, NULL, 0);
 
 	if (ret) {
-		LOG_ERR("No stored credential, or connect failed: %d", ret);
-		LOG_INF("Provision one first, over the shell:");
-		LOG_INF("  wifi cred add -s \"<SSID>\" -k 1 -p \"<password>\"");
+		LOG_ERR("Connect failed: %d", ret);
 	}
 
 	return 0;

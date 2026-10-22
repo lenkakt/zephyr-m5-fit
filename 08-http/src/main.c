@@ -6,6 +6,7 @@
 #include <zephyr/net/net_mgmt.h>
 #include <zephyr/net/net_event.h>
 #include <zephyr/net/wifi_mgmt.h>
+#include <zephyr/net/wifi_credentials.h>
 #include <zephyr/net/socket.h>
 #include <zephyr/net/http/client.h>
 #include <zephyr/posix/sys/socket.h>
@@ -20,8 +21,8 @@
 LOG_MODULE_REGISTER(main);
 
 /* Set these to what you're given in class - see README.md */
-#define SERVER_HOST "192.0.2.1"
-#define SERVER_PORT 5000
+#define SERVER_HOST "10.42.0.1"
+#define SERVER_PORT 5020
 
 #define STRIP_NODE DT_ALIAS(led_strip)
 #define STRIP_NUM_PIXELS DT_PROP(STRIP_NODE, chain_length)
@@ -187,6 +188,13 @@ INPUT_CALLBACK_DEFINE(NULL, button_input_cb, NULL);
 static struct net_mgmt_event_callback wifi_cb;
 static struct net_mgmt_event_callback ipv4_cb;
 
+static void count_ssid(void *cb_arg, const char *ssid, size_t ssid_len)
+{
+	size_t *count = cb_arg;
+
+	(*count)++;
+}
+
 static void event_handler(struct net_mgmt_event_callback *cb,
 			  uint64_t mgmt_event, struct net_if *iface)
 {
@@ -223,13 +231,25 @@ int main(void)
 
 	/* Connect using whatever credential was provisioned over the
 	 * shell with `wifi cred add` - see zephyr-m5-fit/07-wifi.
+	 *
+	 * NET_REQUEST_WIFI_CONNECT_STORED always returns 0 when there is
+	 * nothing stored to connect to, so check the credential count
+	 * ourselves first instead of trusting that return value.
 	 */
+	size_t cred_count = 0;
+
+	wifi_credentials_for_each_ssid(count_ssid, &cred_count);
+
+	if (cred_count == 0) {
+		LOG_ERR("No stored Wi-Fi credential - provision one first, over the shell:");
+		LOG_INF("  wifi cred add -s \"<SSID>\" -k 1 -p \"<password>\"");
+		return 0;
+	}
+
 	int ret = net_mgmt(NET_REQUEST_WIFI_CONNECT_STORED, iface, NULL, 0);
 
 	if (ret) {
-		LOG_ERR("No stored credential, or connect failed: %d", ret);
-		LOG_INF("Provision one first, over the shell:");
-		LOG_INF("  wifi cred add -s \"<SSID>\" -k 1 -p \"<password>\"");
+		LOG_ERR("Connect failed: %d", ret);
 	}
 
 	return 0;
