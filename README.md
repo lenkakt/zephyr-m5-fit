@@ -49,6 +49,26 @@ for the pattern.
 | [10-humidity](10-humidity) | Same template as `09-gyroscope`, applied to an M5Stack "Unit Earth" analog soil/humidity probe on Grove Port B — read via raw ADC/GPIO rather than a sensor driver, since none exists for this probe. |
 | [11-light](11-light) | Same template again, applied to an M5Stack "Light" analog photoresistor — also on Grove Port B (same pin as `10-humidity`, so only one of the two can be plugged in at a time). Reports raw ADC counts, no invented lux formula. |
 | [12-pir-motion](12-pir-motion) | Same template once more, applied to an M5Stack PIR Motion Unit — plain digital GPIO on Grove Port B, no ADC involved. Publishes only on a state change, not every poll, since motion is event-shaped rather than continuously varying. |
+| [13-angle](13-angle) | Same template again, applied to an M5Stack Angle Unit (a potentiometer) — back on Grove Port B's ADC pin (same as `10-humidity`/`11-light`). Reports raw counts plus a left/right/none turn direction, no invented degrees formula. |
+
+## Which examples can be combined
+
+| Grove Port B pin | Sensor examples there |
+|---|---|
+| D0 — GPIO36 (analog/digital) | `10-humidity` (analog reading), `11-light`, `12-pir-motion`, `13-angle` |
+| D1 — GPIO26 (digital) | `10-humidity` (wet/dry threshold signal) |
+
+Only one Grove cable fits Port B at a time, so `10-humidity`,
+`11-light`, `12-pir-motion`, and `13-angle` are mutually exclusive —
+whichever of the four is physically plugged in is the only one that
+will read anything meaningful, regardless of which one you flash.
+
+`09-gyroscope` doesn't use Port B at all (onboard I2C) and can run
+alongside any one of the four. Everything from `01-hello` through
+`08-http` doesn't touch Port B either. If you want two Port-B-style
+sensors active simultaneously in your own project, you'd need to wire
+one of them to a different port/pin yourself — none of these examples
+do that for you.
 
 [`experimental-lvgl`](experimental-lvgl) also exists — an LVGL-based demo
 with button-switched modes — but it's parked: real hardware testing hit a
