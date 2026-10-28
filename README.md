@@ -50,25 +50,32 @@ for the pattern.
 | [11-light](11-light) | Same template again, applied to an M5Stack "Light" analog photoresistor — also on Grove Port B (same pin as `10-humidity`, so only one of the two can be plugged in at a time). Reports raw ADC counts, no invented lux formula. |
 | [12-pir-motion](12-pir-motion) | Same template once more, applied to an M5Stack PIR Motion Unit — plain digital GPIO on Grove Port B, no ADC involved. Publishes only on a state change, not every poll, since motion is event-shaped rather than continuously varying. |
 | [13-angle](13-angle) | Same template again, applied to an M5Stack Angle Unit (a potentiometer) — back on Grove Port B's ADC pin (same as `10-humidity`/`11-light`). Reports raw counts plus a left/right/none turn direction, no invented degrees formula. |
+| [14-keyboard](14-keyboard) | Same template again, applied to an M5Stack CardKB Mini Keyboard Unit — I2C on Grove Port A (not Port B, so it doesn't conflict with any of the four above), no sensor driver for it either. Publishes only on a press/release change. |
 
 ## Which examples can be combined
 
-| Grove Port B pin | Sensor examples there |
+| Grove port / pin | Sensor examples there |
 |---|---|
-| D0 — GPIO36 (analog/digital) | `10-humidity` (analog reading), `11-light`, `12-pir-motion`, `13-angle` |
-| D1 — GPIO26 (digital) | `10-humidity` (wet/dry threshold signal) |
+| Port B, D0 — GPIO36 (analog/digital) | `10-humidity` (analog reading), `11-light`, `12-pir-motion`, `13-angle` |
+| Port B, D1 — GPIO26 (digital) | `10-humidity` (wet/dry threshold signal) |
+| Port A — I2C, GPIO21/22 | `09-gyroscope` (onboard MPU6886, not actually on the Grove port, but the same bus), `14-keyboard` (I2C address 0x5F) |
 
 Only one Grove cable fits Port B at a time, so `10-humidity`,
 `11-light`, `12-pir-motion`, and `13-angle` are mutually exclusive —
 whichever of the four is physically plugged in is the only one that
 will read anything meaningful, regardless of which one you flash.
 
-`09-gyroscope` doesn't use Port B at all (onboard I2C) and can run
-alongside any one of the four. Everything from `01-hello` through
-`08-http` doesn't touch Port B either. If you want two Port-B-style
-sensors active simultaneously in your own project, you'd need to wire
-one of them to a different port/pin yourself — none of these examples
-do that for you.
+`14-keyboard` uses Port A instead, so it doesn't conflict with any of
+the four Port B examples - you can have one Port B sensor and
+`14-keyboard` both plugged in and working at the same time. `09-gyroscope`
+is on the same I2C bus as `14-keyboard` but doesn't use the Grove
+connector (the MPU6886 is onboard), so it's compatible with everything.
+Everything from `01-hello` through `08-http` doesn't touch either Grove
+port.
+
+If you want two Port-B-style sensors active simultaneously in your own
+project, you'd need to wire one of them to a different port/pin
+yourself — none of these examples do that for you.
 
 [`experimental-lvgl`](experimental-lvgl) also exists — an LVGL-based demo
 with button-switched modes — but it's parked: real hardware testing hit a
