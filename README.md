@@ -45,6 +45,7 @@ for the pattern.
 | [06-text](06-text) | Renders real text on the screen without LVGL — a hand-rolled bitmap-font renderer in `common/`, and why Zephyr's own CFB text subsystem can't drive this panel's color output either. |
 | [07-wifi](07-wifi) | Connects to Wi-Fi using a credential provisioned once over the shell (`wifi cred add`) — never hardcoded in source — and why Zephyr's `net_mgmt` events, not a blocking connect call, are how you find out the result. |
 | [08-http](08-http) | Polls a small HTTP color server and drives the LED strip from the response, with a button press triggering a `POST` — ties `07-wifi` together with `02-buttons` and `03-led-strip`, plus Zephyr's HTTP client API. |
+| [09-gyroscope](09-gyroscope) | Reads the onboard MPU6886 gyroscope from a dedicated sampling thread and publishes each reading on a zbus channel, with a listener that logs it — the template for every sensor/actuator example to follow. |
 
 [`experimental-lvgl`](experimental-lvgl) also exists — an LVGL-based demo
 with button-switched modes — but it's parked: real hardware testing hit a
