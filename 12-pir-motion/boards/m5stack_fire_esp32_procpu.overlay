@@ -1,0 +1,46 @@
+/*
+ * M5Stack PIR Motion Unit, on Grove Port B's D0 pin (GPIO36) - a plain
+ * digital output, HIGH while motion is detected. No ADC, no I2C: just
+ * one GPIO.
+ *
+ * Confirmed against multiple independent vendor/retailer guides for
+ * this specific unit: the signal line is GPIO36, not GPIO26 (Port B's
+ * other pin, used by 10-humidity's threshold signal) - this unit does
+ * not follow that same-pin convention. GPIO36 is physical pin 36,
+ * which on this board's gpio1 controller is local index 4 (gpio1
+ * covers physical pins 32-39 as indices 0-7 - confirmed against this
+ * board's own button wiring, e.g. &gpio1 7 = GPIO39).
+ *
+ * "gpio-keys" is the binding whose child-binding declares "gpios" as a
+ * phandle-array - a bare node with no compatible at all does not get
+ * that property type recognized, and GPIO_DT_SPEC_GET() then fails to
+ * compile (same gotcha as 10-humidity). The input/key semantics of
+ * this binding are not used here - the pin is read directly as a
+ * plain GPIO in src/main.c, not through the input subsystem.
+ */
+
+#include <zephyr/dt-bindings/input/input-event-codes.h>
+
+/ {
+	aliases {
+		pir = &pir_motion;
+	};
+
+	pir_motion_grp: pir_motion_grp {
+		compatible = "gpio-keys";
+
+		pir_motion: pir_motion {
+			/* GPIO36 is input-only (physical pins 34-39 on this
+			 * SoC have no output driver and no internal pull
+			 * resistors), which is fine - a PIR's output is
+			 * push-pull, no pull needed.
+			 */
+			gpios = <&gpio1 4 GPIO_ACTIVE_HIGH>;
+			/* Required by this binding's driver, but unused -
+			 * this pin is read directly in src/main.c, never
+			 * through the input subsystem.
+			 */
+			zephyr,code = <INPUT_KEY_9>;
+		};
+	};
+};
