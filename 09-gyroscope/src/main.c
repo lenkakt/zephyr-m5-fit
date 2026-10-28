@@ -113,8 +113,9 @@ K_THREAD_DEFINE(gyro_tid, GYRO_THREAD_STACK_SIZE, gyro_sampling_thread,
 
 int main(void)
 {
-	/* Nothing to do here - the sampling thread (started above via
-	 * K_THREAD_DEFINE) and the zbus listener do all the work.
+	/* Nothing to do here - the sampling thread and the logging
+	 * subscriber (both started above via K_THREAD_DEFINE) do all
+	 * the work.
 	 */
 	return 0;
 }
