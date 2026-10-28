@@ -45,13 +45,36 @@ for the pattern.
 | [06-text](06-text) | Renders real text on the screen without LVGL — a hand-rolled bitmap-font renderer in `common/`, and why Zephyr's own CFB text subsystem can't drive this panel's color output either. |
 | [07-wifi](07-wifi) | Connects to Wi-Fi using a credential provisioned once over the shell (`wifi cred add`) — never hardcoded in source — and why Zephyr's `net_mgmt` events, not a blocking connect call, are how you find out the result. |
 | [08-http](08-http) | Polls a small HTTP color server and drives the LED strip from the response, with a button press triggering a `POST` — ties `07-wifi` together with `02-buttons` and `03-led-strip`, plus Zephyr's HTTP client API. |
-| [09-gyroscope](09-gyroscope) | Reads the onboard MPU6886 gyroscope from a dedicated sampling thread and publishes each reading on a zbus channel, with a listener that logs it — the template for every sensor/actuator example to follow. |
+| [09-gyroscope](09-gyroscope) | Reads the onboard MPU6886 gyroscope from a dedicated sampling thread and publishes each reading on a zbus channel, with a subscriber that logs it — the template for every sensor/actuator example to follow. |
+| [10-humidity](10-humidity) | Same template as `09-gyroscope`, applied to an M5Stack "Unit Earth" analog soil/humidity probe on Grove Port B — read via raw ADC/GPIO rather than a sensor driver, since none exists for this probe. |
+| [11-light](11-light) | Same template again, applied to an M5Stack "Light" analog photoresistor — also on Grove Port B (same pin as `10-humidity`, so only one of the two can be plugged in at a time). Reports raw ADC counts, no invented lux formula. |
+| [12-pir-motion](12-pir-motion) | Same template once more, applied to an M5Stack PIR Motion Unit — plain digital GPIO on Grove Port B, no ADC involved. Publishes only on a state change, not every poll, since motion is event-shaped rather than continuously varying. |
 
 [`experimental-lvgl`](experimental-lvgl) also exists — an LVGL-based demo
 with button-switched modes — but it's parked: real hardware testing hit a
 reproducible crash-reboot loop that hasn't been root-caused yet (see its
 own README). Not part of the main numbered sequence until that's
 resolved.
+
+## Known issue: using the ADC makes a sound
+
+Yes — on real hardware, reading the ADC makes the onboard speaker
+audibly click, and it's hard to get rid of for now. The ESP32 ADC
+driver re-applies a hardware calibration code on every single read
+(`adc_set_hw_calibration_code()`, unconditional, in
+`drivers/adc/adc_esp32.c`), and that's what couples into the speaker —
+not something any example here does wrong, and there's no Kconfig or
+driver option to turn it off.
+
+It scales with how often you call `adc_read_dt()`: sampling a few times
+a second is audible as constant clicking, sampling once every couple of
+seconds is just an occasional faint click. `10-humidity` and `11-light`
+both sample at a 2-second interval specifically for this reason — if you
+write your own ADC-based example, keep your read rate low for the same
+reason. `solutions/04-mic` is the exception: it needs 500Hz sampling to
+detect loudness at all, so slowing it down isn't an option there, and
+its noise is an open, unresolved limitation, documented in its own
+README rather than fixed.
 
 ## Build, flash, verify — the general pattern
 
