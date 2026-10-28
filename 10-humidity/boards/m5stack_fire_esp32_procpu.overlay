@@ -1,0 +1,78 @@
+/*
+ * M5Stack "Unit Earth" analog soil/humidity probe, on Grove Port B:
+ *
+ *   - an analog reading on ADC1 channel 0 (Port B's D0 pin, GPIO36)
+ *   - a digital wet/dry threshold output on Port B's D1 pin (&gpio0 26)
+ *
+ * Neither is defined by this board's own Zephyr devicetree - there is
+ * no discrete sensor chip here (just a resistive probe plus a
+ * comparator on the breakout board), so there is no Zephyr sensor
+ * driver either: this is read directly via the ADC and GPIO APIs,
+ * unlike 09-gyroscope's onboard MPU6886 which has a real driver.
+ *
+ * Per M5Stack's own official docs and ESP-IDF's adc_channel.h
+ * (ADC1_CHANNEL_0_GPIO_NUM 36), Port B's D0 pin is GPIO36 = ADC1
+ * channel 0.
+ */
+
+#include <zephyr/dt-bindings/adc/adc.h>
+#include <zephyr/dt-bindings/input/input-event-codes.h>
+
+/ {
+	aliases {
+		thresh = &humid_thresh;
+	};
+
+	zephyr,user {
+		io-channels = <&adc0 0>;
+	};
+
+	/* "gpio-keys" is just the binding whose child-binding declares
+	 * "gpios" as a phandle-array - a bare node with no compatible at
+	 * all does not get that property type recognized, and
+	 * GPIO_DT_SPEC_GET() then fails to compile. The input/key
+	 * semantics of this binding are not used here - the pin is read
+	 * directly as a plain GPIO in src/main.c, not through the input
+	 * subsystem.
+	 */
+	humid_thresh_grp: humid_thresh_grp {
+		compatible = "gpio-keys";
+
+		humid_thresh: humid_thresh {
+			/* ESP32's GPIO controller takes exactly one flags
+			 * cell (#gpio-cells = <2>: pin, flags) - OR the
+			 * flags together, don't list them as separate cells.
+			 */
+			gpios = <&gpio0 26 (GPIO_ACTIVE_LOW | GPIO_PULL_DOWN)>;
+			/* Required by this binding's driver, but unused -
+			 * this pin is read directly in src/main.c, never
+			 * through the input subsystem.
+			 */
+			zephyr,code = <INPUT_KEY_9>;
+		};
+	};
+};
+
+&adc0 {
+	compatible = "espressif,esp32-adc";
+	status = "okay";
+	#address-cells = <1>;
+	#size-cells = <0>;
+
+	channel0: channel@0 {
+		status = "okay";
+		reg = <0>;
+		zephyr,gain = "ADC_GAIN_1_4";
+		zephyr,reference = "ADC_REF_INTERNAL";
+		zephyr,acquisition-time = <ADC_ACQ_TIME_DEFAULT>;
+		/* Required - the ESP32 ADC driver rejects resolution 0,
+		 * the default if left unset. 12-bit is this chip's max.
+		 */
+		zephyr,resolution = <12>;
+	};
+};
+
+/* Not used by this app. */
+&speaker {
+	status = "disabled";
+};
