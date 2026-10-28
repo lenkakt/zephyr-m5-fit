@@ -1,0 +1,28 @@
+/*
+ * M5Stack CardKB Mini Keyboard Unit, on Grove Port A (I2C) - SDA=GPIO21,
+ * SCL=GPIO22, same I2C bus the onboard MPU6886 (09-gyroscope) is
+ * already on. Confirmed against M5Stack's own docs: I2C address 0x5F.
+ *
+ * Unlike 10-humidity/11-light/12-pir-motion/13-angle, this uses Port A,
+ * not Port B - it does not conflict with any of those four.
+ *
+ * There is no Zephyr driver for this device (it is not a generic
+ * sensor, it is a tiny keyboard controller), so it is read directly
+ * via the I2C API in src/main.c. Its protocol (per third-party
+ * documentation - M5Stack's own docs don't go past the I2C address)
+ * is a single plain read with no register address: the returned byte
+ * is 0 when no key is pressed, otherwise the ASCII code of the key.
+ */
+
+&i2c0 {
+	cardkb: cardkb@5f {
+		status = "okay";
+		reg = <0x5f>;
+	};
+};
+
+/ {
+	aliases {
+		cardkb = &cardkb;
+	};
+};
