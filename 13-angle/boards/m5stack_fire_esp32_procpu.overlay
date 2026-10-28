@@ -1,0 +1,44 @@
+/*
+ * M5Stack Angle Unit (a potentiometer), on Grove Port B's D0 pin.
+ *
+ * Per M5Stack's own official docs and ESP-IDF's adc_channel.h
+ * (ADC1_CHANNEL_0_GPIO_NUM 36), Port B's D0 pin is GPIO36 = ADC1
+ * channel 0 - the same pin 10-humidity's probe and 11-light's sensor
+ * use. Only one of the three can be plugged into Port B at a time.
+ *
+ * A potentiometer is not a smart sensor chip - there is no Zephyr
+ * sensor driver for it, so this is read directly via the ADC API,
+ * same as 10-humidity and 11-light.
+ */
+
+#include <zephyr/dt-bindings/adc/adc.h>
+
+/ {
+	zephyr,user {
+		io-channels = <&adc0 0>;
+	};
+};
+
+&adc0 {
+	compatible = "espressif,esp32-adc";
+	status = "okay";
+	#address-cells = <1>;
+	#size-cells = <0>;
+
+	channel0: channel@0 {
+		status = "okay";
+		reg = <0>;
+		zephyr,gain = "ADC_GAIN_1_4";
+		zephyr,reference = "ADC_REF_INTERNAL";
+		zephyr,acquisition-time = <ADC_ACQ_TIME_DEFAULT>;
+		/* Required - the ESP32 ADC driver rejects resolution 0,
+		 * the default if left unset. 12-bit is this chip's max.
+		 */
+		zephyr,resolution = <12>;
+	};
+};
+
+/* Not used by this app. */
+&speaker {
+	status = "disabled";
+};
