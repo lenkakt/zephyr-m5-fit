@@ -121,3 +121,7 @@ picocom -b 115200 /dev/ttyACM0
 
 — and, on any example with the shell enabled, run `device list` at the
 `uart:~$` prompt. Each example's own README has the specifics.
+
+## License
+
+Licensed under the [Apache License, Version 2.0](LICENSE).

@@ -1,4 +1,11 @@
 /*
+ * Copyright (c) 2026 Lenka Koskova Triskova
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
+ */
+
+/*
  * M5Stack "Light" analog ambient-light sensor (a photoresistor), on
  * Grove Port B's D0 pin.
  *

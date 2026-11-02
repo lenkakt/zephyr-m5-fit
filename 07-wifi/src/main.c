@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2026 Lenka Koskova Triskova
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
+ */
+
 #include <zephyr/kernel.h>
 #include <zephyr/net/net_if.h>
 #include <zephyr/net/net_mgmt.h>

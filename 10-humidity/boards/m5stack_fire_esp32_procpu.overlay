@@ -1,4 +1,11 @@
 /*
+ * Copyright (c) 2026 Lenka Koskova Triskova
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
+ */
+
+/*
  * M5Stack "Unit Earth" analog soil/humidity probe, on Grove Port B:
  *
  *   - an analog reading on ADC1 channel 0 (Port B's D0 pin, GPIO36)

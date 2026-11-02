@@ -1,4 +1,11 @@
 /*
+ * Copyright (c) 2026 Lenka Koskova Triskova
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
+ */
+
+/*
  * M5Stack CardKB Mini Keyboard Unit, on Grove Port A (I2C) - SDA=GPIO21,
  * SCL=GPIO22, same I2C bus the onboard MPU6886 (09-gyroscope) is
  * already on. Confirmed against M5Stack's own docs: I2C address 0x5F.
