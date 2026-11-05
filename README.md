@@ -51,6 +51,7 @@ for the pattern.
 | [12-pir-motion](12-pir-motion) | Same template once more, applied to an M5Stack PIR Motion Unit — plain digital GPIO on Grove Port B, no ADC involved. Publishes only on a state change, not every poll, since motion is event-shaped rather than continuously varying. |
 | [13-angle](13-angle) | Same template again, applied to an M5Stack Angle Unit (a potentiometer) — back on Grove Port B's ADC pin (same as `10-humidity`/`11-light`). Reports raw counts plus a left/right/none turn direction, no invented degrees formula. |
 | [14-keyboard](14-keyboard) | Same template again, applied to an M5Stack CardKB Mini Keyboard Unit — I2C on Grove Port A (not Port B, so it doesn't conflict with any of the four above), no sensor driver for it either. Publishes only on a press/release change. |
+| [15-mqtt](15-mqtt) | Connects to an external MQTT broker with Zephyr's native MQTT client (`zephyr/net/mqtt.h`) from a dedicated thread, subscribes to a topic, and publishes an increasing counter to it once a second — self-contained on one device (the broker echoes a client's own publish back to itself), no partner board or broker-on-device required. |
 
 ## Which examples can be combined
 
