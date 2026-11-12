@@ -1,0 +1,20 @@
+flowchart LR
+    sensor["Sensor node\nMQTT client\n(15-mqtt-style)"]
+
+    subgraph gw["This gateway"]
+        direction TB
+        broker["broker\n(listens on AP side)"]
+        uplink["uplink thread\nMQTT client,\nsubscribed to own broker"]
+        broker -. "loopback\n127.0.0.1" .-> uplink
+    end
+
+    cloud["InfluxDB / Grafana\n(left for the full solution)"]
+
+    sensor -- "AP Wi-Fi\npublish" --> broker
+    uplink -. "STA Wi-Fi\n(left for the full solution)" .-> cloud
+
+    classDef node fill:#eef0fb,stroke:#3333b2,stroke-width:1.5px,color:#111;
+    classDef future fill:#f2f2f2,stroke:#999,stroke-width:1px,color:#555,stroke-dasharray: 4 3;
+    class sensor,broker,uplink node;
+    class cloud future;
+    style gw fill:#f7f8fd,stroke:#3333b2,stroke-width:1.5px

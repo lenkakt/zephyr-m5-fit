@@ -1,0 +1,12 @@
+/* SPDX-License-Identifier: GPL-3.0-or-later */
+/*
+ * Second Wi-Fi node so the ESP32 driver exposes an AP interface
+ * alongside the STA one - needed for AP+STA concurrent mode. Same node
+ * Zephyr's own samples/net/wifi/apsta_mode uses for esp32_procpu.
+ */
+/ {
+	wifi_ap: wifi_ap {
+		compatible = "espressif,esp32-wifi";
+		status = "okay";
+	};
+};

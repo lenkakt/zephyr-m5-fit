@@ -1,0 +1,21 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+source "Kconfig.zephyr"
+
+config APP_AP_SSID
+	string "AP SSID for the sensor-side network this gateway hosts"
+	default "fit-iot-gateway"
+	depends on WIFI
+
+config APP_AP_PSK
+	string "AP password (empty = open network - fine for a classroom demo)"
+	depends on WIFI
+
+config APP_AP_IP_ADDRESS
+	string "AP interface IP address"
+	default "192.168.4.1"
+	depends on WIFI
+
+config APP_UPLINK_TOPIC_FILTER
+	string "Topic filter the gateway's internal client subscribes to, on its own broker"
+	default "+/sensor"
+	depends on WOLFMQTT
