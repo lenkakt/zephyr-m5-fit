@@ -1,0 +1,13 @@
+flowchart TB
+    wolfmqtt["wolfMQTT (upstream)\nwolfSSL/wolfMQTT — GPL-3.0"]
+    port["zephyr-wolfmqtt-broker\nlenkakt's port to Zephyr:\nown West workspace pinning Zephyr v4.4.2,\nsocket glue (broker_net.c) + Kconfig/CMake wiring"]
+    broker16["zephyr-m5-fit/16-broker\nclone & run it as-is —\nsee how the port works"]
+    gateway17["zephyr-m5-fit/17-gateway\nsame porting pattern, reapplied\nin this shared workspace\n+ AP+STA, broker and client at once"]
+
+    wolfmqtt -- "ported to Zephyr" --> port
+    port -- "clone & run standalone" --> broker16
+    wolfmqtt -- "fetched directly\n(deps/wolfmqtt)" --> gateway17
+    port -. "same pattern —\nread it first" .-> gateway17
+
+    classDef node fill:#eef0fb,stroke:#3333b2,stroke-width:1.5px,color:#111;
+    class wolfmqtt,port,broker16,gateway17 node;
